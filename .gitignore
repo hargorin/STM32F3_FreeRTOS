@@ -1,3 +1,7 @@
+# ignore the output directory
+dep/
+build/
+
 # Prerequisites
 *.d
 

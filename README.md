@@ -49,6 +49,4 @@ And you can debug with GDB as you would expect.
 
 ### Toolchain installation under ubuntu linux
 
-    sudo add-apt-repository ppa:team-gcc-arm-embedded/ppa
-    sudo apt-get update
-    sudo apt install gcc-arm-none-eabi
+    [Installation Guide](https://askubuntu.com/questions/1243252/how-to-install-arm-none-eabi-gdb-on-ubuntu-20-04-lts-focal-fossa)
