@@ -49,9 +49,10 @@ vpath %.s $(STARTUP)
 ASRC=startup_stm32f303xc.s
 
 # Project Source Files
+SRC+=main.c
+
 SRC+=stm32f3xx_it.c
 SRC+=system_stm32f3xx.c
-SRC+=main.c
 SRC+=syscalls.c
 
 # FreeRTOS Source Files
@@ -63,49 +64,62 @@ SRC+=event_groups.c
 SRC+=timers.c
 SRC+=heap_4.c
 
-# Standard Peripheral Source Files
-# SRC+=misc.c
-# SRC+=stm32f4xx_dcmi.c
-# #SRC+=stm32f4xx_hash.c
-# SRC+=stm32f4xx_rtc.c
-# SRC+=stm32f4xx_adc.c
-# SRC+=stm32f4xx_dma.c
-# #SRC+=stm32f4xx_hash_md5.c
-# SRC+=stm32f4xx_sai.c
-# SRC+=stm32f4xx_can.c
-# SRC+=stm32f4xx_dma2d.c
-# #SRC+=stm32f4xx_hash_sha1.c
-# SRC+=stm32f4xx_sdio.c
-# SRC+=stm32f4xx_cec.c
-# SRC+=stm32f4xx_dsi.c
-# SRC+=stm32f4xx_i2c.c
-# SRC+=stm32f4xx_spdifrx.c
-# SRC+=stm32f4xx_crc.c
-# SRC+=stm32f4xx_exti.c
-# SRC+=stm32f4xx_iwdg.c
-# SRC+=stm32f4xx_spi.c
-# #SRC+=stm32f4xx_cryp.c
-# SRC+=stm32f4xx_flash.c
-# SRC+=stm32f4xx_lptim.c
-# SRC+=stm32f4xx_syscfg.c
-# #SRC+=stm32f4xx_cryp_aes.c
-# SRC+=stm32f4xx_flash_ramfunc.c
-# SRC+=stm32f4xx_ltdc.c
-# SRC+=stm32f4xx_tim.c
-# #SRC+=stm32f4xx_cryp_des.c
-# #SRC+=stm32f4xx_fmc.c
-# SRC+=stm32f4xx_pwr.c
-# SRC+=stm32f4xx_usart.c
-# #SRC+=stm32f4xx_cryp_tdes.c
-# SRC+=stm32f4xx_fmpi2c.c
-# SRC+=stm32f4xx_qspi.c
-# SRC+=stm32f4xx_wwdg.c
-# SRC+=stm32f4xx_dac.c
-# SRC+=stm32f4xx_fsmc.c
-# SRC+=stm32f4xx_rcc.c
-# SRC+=stm32f4xx_dbgmcu.c
-# SRC+=stm32f4xx_gpio.c
-# SRC+=stm32f4xx_rng.c
+# HAL Source Files
+SRC+=stm32f3xx_hal_adc.c
+SRC+=stm32f3xx_hal_adc_ex.c
+SRC+=stm32f3xx_hal.c
+SRC+=stm32f3xx_hal_can.c
+SRC+=stm32f3xx_hal_cec.c
+SRC+=stm32f3xx_hal_comp.c
+SRC+=stm32f3xx_hal_cortex.c
+SRC+=stm32f3xx_hal_crc.c
+SRC+=stm32f3xx_hal_crc_ex.c
+SRC+=stm32f3xx_hal_dac.c
+SRC+=stm32f3xx_hal_dac_ex.c
+SRC+=stm32f3xx_hal_dma.c
+SRC+=stm32f3xx_hal_exti.c
+SRC+=stm32f3xx_hal_flash.c
+SRC+=stm32f3xx_hal_flash_ex.c
+SRC+=stm32f3xx_hal_gpio.c
+SRC+=stm32f3xx_hal_hrtim.c
+SRC+=stm32f3xx_hal_i2c.c
+SRC+=stm32f3xx_hal_i2c_ex.c
+SRC+=stm32f3xx_hal_i2s.c
+SRC+=stm32f3xx_hal_i2s_ex.c
+SRC+=stm32f3xx_hal_irda.c
+SRC+=stm32f3xx_hal_iwdg.c
+SRC+=stm32f3xx_hal_msp_template.c
+SRC+=stm32f3xx_hal_nand.c
+SRC+=stm32f3xx_hal_nor.c
+SRC+=stm32f3xx_hal_opamp.c
+SRC+=stm32f3xx_hal_opamp_ex.c
+SRC+=stm32f3xx_hal_pccard.c
+SRC+=stm32f3xx_hal_pcd.c
+SRC+=stm32f3xx_hal_pcd_ex.c
+SRC+=stm32f3xx_hal_pwr.c
+SRC+=stm32f3xx_hal_pwr_ex.c
+SRC+=stm32f3xx_hal_rcc.c
+SRC+=stm32f3xx_hal_rcc_ex.c
+SRC+=stm32f3xx_hal_rtc.c
+SRC+=stm32f3xx_hal_rtc_ex.c
+SRC+=stm32f3xx_hal_sdadc.c
+SRC+=stm32f3xx_hal_smartcard.c
+SRC+=stm32f3xx_hal_smartcard_ex.c
+SRC+=stm32f3xx_hal_smbus.c
+SRC+=stm32f3xx_hal_spi.c
+SRC+=stm32f3xx_hal_spi_ex.c
+SRC+=stm32f3xx_hal_sram.c
+SRC+=stm32f3xx_hal_tim.c
+#SRC+=stm32f3xx_hal_timebase_rtc_alarm_template.c
+#SRC+=stm32f3xx_hal_timebase_rtc_wakeup_template.c
+#SRC+=stm32f3xx_hal_timebase_tim_template.c
+SRC+=stm32f3xx_hal_tim_ex.c
+SRC+=stm32f3xx_hal_tsc.c
+SRC+=stm32f3xx_hal_uart.c
+SRC+=stm32f3xx_hal_uart_ex.c
+SRC+=stm32f3xx_hal_usart.c
+SRC+=stm32f3xx_hal_usart_ex.c
+SRC+=stm32f3xx_hal_wwdg.c
 
 # CDEFS=-DUSE_STDPERIPH_DRIVER
 # CDEFS+=-DSTM32F3XX
@@ -114,6 +128,8 @@ SRC+=heap_4.c
 # CDEFS+=-D__FPU_PRESENT=1
 # CDEFS+=-D__FPU_USED=1
 # CDEFS+=-DARM_MATH_CM4
+CDEFS =-DSTM32F3XX 
+CDEFS+=-DUSE_HAL_DRIVER
 
 MCUFLAGS=-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -finline-functions -Wdouble-promotion -std=gnu99
 COMMONFLAGS=-O$(OPTLVL) $(DBG) -Wall -ffunction-sections -fdata-sections
