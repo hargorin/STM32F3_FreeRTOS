@@ -1,134 +1,220 @@
-/*
- * This file is part of the µOS++ distribution.
- *   (https://github.com/micro-os-plus)
- * Copyright (c) 2014 Liviu Ionescu.
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or
- * sell copies of the Software, and to permit persons to whom
- * the Software is furnished to do so, subject to the following
- * conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
- */
+/**
+  ******************************************************************************
+  * @file    GPIO/GPIO_EXTI/Src/main.c 
+  * @author  MCD Application Team
+  * @brief   This example describes how to configure and use GPIOs through 
+  *          the STM32F3xx HAL API.
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2016 STMicroelectronics.
+  * All rights reserved.</center></h2>
+  *
+  * This software component is licensed by ST under BSD 3-Clause license,
+  * the "License"; You may not use this file except in compliance with the
+  * License. You may obtain a copy of the License at:
+  *                        opensource.org/licenses/BSD-3-Clause
+  *
+  ******************************************************************************
+  */
 
-// ----------------------------------------------------------------------------
-
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 
-/*
- * Set up the hardware ready to run this demo.
- */
-static void prvSetupHardware( void );
+/** @addtogroup STM32F3xx_HAL_Examples
+  * @{
+  */
 
-/*
- * Tasks
- */
-portTASK_FUNCTION_PROTO(vApplicationTaskTest, pvParameters);
-portTASK_FUNCTION_PROTO(vApplicationTaskTest2, pvParameters);
+/** @addtogroup GPIO_EXTI
+  * @{
+  */
 
+/* Private typedef -----------------------------------------------------------*/
+const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
+/* Private define ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
+__IO uint32_t i =0;
+/* Private function prototypes -----------------------------------------------*/
+static void SystemClock_Config(void);
+static void Error_Handler(void);
+static void EXTI0_Config(void);
+/* Private functions ---------------------------------------------------------*/
 
-// ----- main() ---------------------------------------------------------------
-
-// Sample pragmas to cope with warnings. Please note the related line at
-// the end of this function, used to pop the compiler diagnostics status.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wmissing-declarations"
-#pragma GCC diagnostic ignored "-Wreturn-type"
-
-int
-main(int argc, char* argv[])
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
+int main(void)
 {
-  // At this stage the system clock should have already been configured
-  // at high speed.
+ /* This sample code shows how to use STM32F3xx GPIO HAL API to toggle LED3, LED6, LED7, LED10 
+    on STM32F3-DK board in an infinite loop. */
 
-  // Infinite loop
+  /* STM32F3xx HAL library initialization:
+       - Configure the Flash prefetch
+       - Systick timer is configured by default as source of time base, but user 
+         can eventually implement his proper time base source (a general purpose 
+         timer for example or other time source), keeping in mind that Time base 
+         duration should be kept 1ms since PPP_TIMEOUT_VALUEs are defined and 
+         handled in milliseconds basis.
+       - Set NVIC Group Priority to 4
+       - Low Level Initialization
+     */
+  HAL_Init();
+
+  /* Configure the system clock to have a system clock = 72 Mhz */
+  SystemClock_Config();
+  
+  /* Initialize LEDs mounted on DK board */
+  BSP_LED_Init(LED3);
+  BSP_LED_Init(LED4);
+  BSP_LED_Init(LED6); 
+  BSP_LED_Init(LED7); 
+  BSP_LED_Init(LED10); 
+
+  /* Configure EXTI0 (connected to PA0 pin) in interrupt mode */
+  /* Do basically the same as BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI); */
+  EXTI0_Config();
+
   while (1)
-    {
-	  /* Configure the hardware ready to run the test. */
-	  prvSetupHardware();
-
-	  xTaskCreate(vApplicationTaskTest, "TestTask", configMINIMAL_STACK_SIZE, (void * ) NULL, tskIDLE_PRIORITY+1UL, NULL);
-	  xTaskCreate(vApplicationTaskTest2, "TestTask2", configMINIMAL_STACK_SIZE, (void * ) NULL, tskIDLE_PRIORITY+1UL, NULL);
-
-	  /* Start the scheduler. */
-	  vTaskStartScheduler();
-
-	  /* Should never be reached */
-	  for( ;; );    }
+  {
+  	BSP_LED_On(LED4);
+  }
 }
 
-#pragma GCC diagnostic pop
+/**
+  * @brief  System Clock Configuration
+  *         The system Clock is configured as follow : 
+  *            System Clock source            = PLL (HSE)
+  *            SYSCLK(Hz)                     = 72000000
+  *            HCLK(Hz)                       = 72000000
+  *            AHB Prescaler                  = 1
+  *            APB1 Prescaler                 = 2
+  *            APB2 Prescaler                 = 1
+  *            HSE Frequency(Hz)              = 8000000
+  *            HSE PREDIV                     = 1
+  *            PLLMUL                         = RCC_PLL_MUL9 (9)
+  *            Flash Latency(WS)              = 2
+  * @param  None
+  * @retval None
+  */
+static void SystemClock_Config(void)
+{
+  RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_OscInitTypeDef RCC_OscInitStruct;
+  
+  /* Enable HSE Oscillator and activate PLL with HSE as source */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
+  {
+    Error_Handler();
+  }
 
-static void prvSetupHardware( void ){
-
-	/* Setup STM32 system (clock, PLL and Flash configuration) */
-	SystemInit();
-
+  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
+     clocks dividers */
+  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;  
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2)!= HAL_OK)
+  {
+    Error_Handler();
+  }
 }
 
-/*
- * Callbacks/Hooks
- */
-
-void vApplicationTickHook( void ){
-
-	trace_printf("Entered vApplicationTickHook\n");
-
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @param  None
+  * @retval None
+  */
+static void Error_Handler(void)
+{
+  /* User may add here some code to deal with this error */
+  while(1)
+  {
+  }
 }
 
-void vApplicationIdleHook( void ){
+/**
+  * @brief  Configures EXTI Line9-5 (connected to PE6 pin) in interrupt mode
+  * @param  None
+  * @retval None
+  */
+static void EXTI0_Config(void)
+{
+  GPIO_InitTypeDef   GPIO_InitStructure;
 
-	trace_printf("Entered vApplicationIdleHook\n");
+  /* Enable GPIOA clock */
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  
+  /* Configure User Button, connected to PE6 IOs in External Interrupt Mode with Rising edge trigger detection. */
+  GPIO_InitStructure.Pin = GPIO_PIN_0;
+  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStructure.Pull = GPIO_NOPULL;
+  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+  /* Enable and set EXTI0 Interrupt to the lowest priority */
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 }
 
-void vApplicationMallocFailedHook( void ){
-
-	trace_printf("Entered vApplicationMallocFailedHook\n");
-	for(;;);
+/**
+  * @brief EXTI line detection callbacks
+  * @param GPIO_Pin: Specifies the pins connected EXTI line
+  * @retval None
+  */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == USER_BUTTON_PIN)
+  {
+    /* Delay */
+    for(i=0; i<0x7FFFF; i++);
+    /* Toggle LD3 */
+    BSP_LED_Toggle(LED3);
+    /* Toggle LD6 */
+    BSP_LED_Toggle(LED6);
+    /* Toggle LD7 */
+    BSP_LED_Toggle(LED7);
+    /* Toggle LD10 */
+    BSP_LED_Toggle(LED10);
+  }
 }
+#ifdef  USE_FULL_ASSERT
 
-void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName){
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t* file, uint32_t line)
+{ 
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
-	( void )pxTask;
-	( void )pcTaskName;
-
-	for(;;);
+  /* Infinite loop */
+  while (1)
+  {
+  }
 }
+#endif /* USE_FULL_ASSERT */
 
-/*
- * Tasks
- */
+/**
+  * @}
+  */
 
-void vApplicationTaskTest( void *pvParameters){
+/**
+  * @}
+  */
 
-	while(1){
-		// Code
-	}
-}
-
-void vApplicationTaskTest2( void *pvParameters){
-
-	while(1){
-		// Code
-	}
-}
-
-
-
-// ----------------------------------------------------------------------------
+/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

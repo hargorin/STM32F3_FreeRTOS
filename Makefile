@@ -35,6 +35,7 @@ INCLUDE+=-I$(CURDIR)/Libraries/CMSIS/Include
 INCLUDE+=-I$(CURDIR)/Libraries/CMSIS/RTOS
 INCLUDE+=-I$(CURDIR)/Libraries/STM32F3xx_HAL_Driver/Inc
 INCLUDE+=-I$(CURDIR)/config
+INCLUDE+=-I$(CURDIR)/board
 
 BUILD_DIR = $(CURDIR)/build
 BIN_DIR = $(CURDIR)/binary
@@ -43,7 +44,8 @@ BIN_DIR = $(CURDIR)/binary
 # of the same directory as their source files
 vpath %.c $(CURDIR)/Libraries/STM32F3xx_HAL_Driver/Src \
           $(CURDIR)/Libraries/syscall $(CURDIR)/hardware $(FREERTOS) \
-          $(FREERTOS)/portable/MemMang $(FREERTOS)/portable/GCC/ARM_CM4F 
+          $(FREERTOS)/portable/MemMang $(FREERTOS)/portable/GCC/ARM_CM4F \
+          $(CURDIR)/board
 
 vpath %.s $(STARTUP)
 ASRC=startup_stm32f303xc.s
@@ -51,6 +53,7 @@ ASRC=startup_stm32f303xc.s
 # Project Source Files
 SRC+=main.c
 
+SRC+=stm32f3_discovery.c
 SRC+=stm32f3xx_it.c
 SRC+=system_stm32f3xx.c
 SRC+=syscalls.c
