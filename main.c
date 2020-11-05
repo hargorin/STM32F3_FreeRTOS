@@ -1,9 +1,8 @@
 /**
   ******************************************************************************
-  * @file    GPIO/GPIO_EXTI/Src/main.c 
+  * @file    FreeRTOS/FreeRTOS_ThreadCreation/Src/main.c
   * @author  MCD Application Team
-  * @brief   This example describes how to configure and use GPIOs through 
-  *          the STM32F3xx HAL API.
+  * @brief   Main program body
   ******************************************************************************
   * @attention
   *
@@ -19,27 +18,22 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "main.h"
 #include "cmsis_os.h"
-
-/** @addtogroup STM32F3xx_HAL_Examples
-  * @{
-  */
-
-/** @addtogroup GPIO_EXTI
-  * @{
-  */
+#include "FreeRTOS.h"
+#include "task.h"
 
 /* Private typedef -----------------------------------------------------------*/
-const TickType_t xDelay = 500 / portTICK_PERIOD_MS;
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-__IO uint32_t i =0;
 /* Private function prototypes -----------------------------------------------*/
-static void SystemClock_Config(void);
-static void Error_Handler(void);
-static void EXTI0_Config(void);
+static void LEDBlinking(void *pvParameters);
+void SystemClock_Config(void);
+
 /* Private functions ---------------------------------------------------------*/
 
 /**
@@ -49,9 +43,6 @@ static void EXTI0_Config(void);
   */
 int main(void)
 {
- /* This sample code shows how to use STM32F3xx GPIO HAL API to toggle LED3, LED6, LED7, LED10 
-    on STM32F3-DK board in an infinite loop. */
-
   /* STM32F3xx HAL library initialization:
        - Configure the Flash prefetch
        - Systick timer is configured by default as source of time base, but user 
@@ -64,25 +55,47 @@ int main(void)
      */
   HAL_Init();
 
-  /* Configure the system clock to have a system clock = 72 Mhz */
+  /* Configure the System clock to 72 MHz */
   SystemClock_Config();
-  
-  /* Initialize LEDs mounted on DK board */
+
+  /* Initialize LEDs */
   BSP_LED_Init(LED3);
   BSP_LED_Init(LED4);
-  BSP_LED_Init(LED6); 
-  BSP_LED_Init(LED7); 
-  BSP_LED_Init(LED10); 
+  BSP_LED_Init(LED5);
+  BSP_LED_Init(LED6);
+  BSP_LED_Init(LED7);
+  BSP_LED_Init(LED8);
+  BSP_LED_Init(LED9);
+  BSP_LED_Init(LED10);
 
-  /* Configure EXTI0 (connected to PA0 pin) in interrupt mode */
-  /* Do basically the same as BSP_PB_Init(BUTTON_USER, BUTTON_MODE_EXTI); */
-  EXTI0_Config();
+  BSP_LED_On(LED4);
 
-  while (1)
-  {
-  	BSP_LED_On(LED4);
+  xTaskCreate(LEDBlinking, "LEDBlinking", (configMINIMAL_STACK_SIZE + 50), NULL, (tskIDLE_PRIORITY + 1), NULL);
+  
+  BSP_LED_On(LED5);
+
+  /* Start scheduler */
+  vTaskStartScheduler();
+  //osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
+  for (;;);
+
+}
+
+static void LEDBlinking(__attribute__ ((unused)) void *pvParameters)
+{
+
+  BSP_LED_On(LED7);
+  while (1) {
+    BSP_LED_On(LED3);
+    vTaskDelay(500);
+    BSP_LED_Off(LED3);
+    vTaskDelay(500);
   }
 }
+
+
 
 /**
   * @brief  System Clock Configuration
@@ -100,7 +113,7 @@ int main(void)
   * @param  None
   * @retval None
   */
-static void SystemClock_Config(void)
+void SystemClock_Config(void)
 {
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -114,7 +127,8 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct)!= HAL_OK)
   {
-    Error_Handler();
+    /* Initialization Error */
+    while(1); 
   }
 
   /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 
@@ -126,95 +140,28 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2)!= HAL_OK)
   {
-    Error_Handler();
-  }
-}
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @param  None
-  * @retval None
-  */
-static void Error_Handler(void)
-{
-  /* User may add here some code to deal with this error */
-  while(1)
-  {
-  }
-}
-
-/**
-  * @brief  Configures EXTI Line9-5 (connected to PE6 pin) in interrupt mode
-  * @param  None
-  * @retval None
-  */
-static void EXTI0_Config(void)
-{
-  GPIO_InitTypeDef   GPIO_InitStructure;
-
-  /* Enable GPIOA clock */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  
-  /* Configure User Button, connected to PE6 IOs in External Interrupt Mode with Rising edge trigger detection. */
-  GPIO_InitStructure.Pin = GPIO_PIN_0;
-  GPIO_InitStructure.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStructure.Pull = GPIO_NOPULL;
-  GPIO_InitStructure.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  /* Enable and set EXTI0 Interrupt to the lowest priority */
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
-}
-
-/**
-  * @brief EXTI line detection callbacks
-  * @param GPIO_Pin: Specifies the pins connected EXTI line
-  * @retval None
-  */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-  if(GPIO_Pin == USER_BUTTON_PIN)
-  {
-    /* Delay */
-    for(i=0; i<0x7FFFF; i++);
-    /* Toggle LD3 */
-    BSP_LED_Toggle(LED3);
-    /* Toggle LD6 */
-    BSP_LED_Toggle(LED6);
-    /* Toggle LD7 */
-    BSP_LED_Toggle(LED7);
-    /* Toggle LD10 */
-    BSP_LED_Toggle(LED10);
+    /* Initialization Error */
+    while(1); 
   }
 }
 #ifdef  USE_FULL_ASSERT
 
 /**
   * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
+  *   where the assert_param error has occurred.
   * @param  file: pointer to the source file name
   * @param  line: assert_param error line source number
   * @retval None
   */
-void assert_failed(uint8_t* file, uint32_t line)
-{ 
+void assert_failed(uint8_t *file, uint32_t line)
+{
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 
   /* Infinite loop */
   while (1)
-  {
-  }
+  {}
 }
-#endif /* USE_FULL_ASSERT */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
+#endif
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

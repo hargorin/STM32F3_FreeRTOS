@@ -52,7 +52,7 @@
 #define configTICK_RATE_HZ                      ( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES                    ( 7 )
 #define configMINIMAL_STACK_SIZE                ( ( uint16_t ) 128 )
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 2 * 1024 ) )
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) ( 4 * 1024 ) )
 #define configMAX_TASK_NAME_LEN                 ( 16 )
 #define configUSE_TRACE_FACILITY                1
 #define configUSE_16_BIT_TICKS                  0
@@ -71,7 +71,7 @@
 #define configMAX_CO_ROUTINE_PRIORITIES         ( 2 )
 
 /* Software timer definitions. */
-#define configUSE_TIMERS                        0
+#define configUSE_TIMERS                        1
 #define configTIMER_TASK_PRIORITY               ( 2 )
 #define configTIMER_QUEUE_LENGTH                10
 #define configTIMER_TASK_STACK_DEPTH            ( configMINIMAL_STACK_SIZE * 2 )
@@ -125,7 +125,7 @@ header file. */
 
 /* IMPORTANT: This define MUST be commented when used with STM32Cube firmware,
               to prevent overwriting SysTick_Handler defined within STM32Cube HAL */
-/* #define xPortSysTickHandler SysTick_Handler */
+// #define xPortSysTickHandler SysTick_Handler
 
 #endif /* FREERTOS_CONFIG_H */
 

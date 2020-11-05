@@ -18,7 +18,7 @@ Requires an arm-none-eabi- set of gcc tools
 
 Using [stlink](https://github.com/texane/stlink)
 
-    {sudo} st-flash write build/stm32f3discovery-demo.bin 0x8000000
+    {sudo} st-flash write binary/stm32f3disc.bin 0x8000000
 
 ### Use
 
@@ -36,7 +36,7 @@ In one terminal:
     
 And another:
 
-    arm-non-eabi-gdb build/stm32f3discovery-demo.elf
+    arm-non-eabi-gdb binary/stm32f3disc.elf
     
 And then within GDB:
 
