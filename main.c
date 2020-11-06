@@ -30,6 +30,8 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+BaseType_t xReturned;
+
 /* Private function prototypes -----------------------------------------------*/
 static void LEDBlinking(void *pvParameters);
 void SystemClock_Config(void);
@@ -68,11 +70,18 @@ int main(void)
   BSP_LED_Init(LED9);
   BSP_LED_Init(LED10);
 
-  BSP_LED_On(LED4);
+  xReturned = xTaskCreate(LEDBlinking, "LEDBlink", (configMINIMAL_STACK_SIZE + 50), NULL, (tskIDLE_PRIORITY + 1), NULL);
+  if(xReturned == pdPASS) {
+    BSP_LED_On(LED6);
+  }
+  else if(xReturned == errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY) {
+    BSP_LED_On(LED7);
+  }
+  else {
+    BSP_LED_On(LED10);
+  }
 
-  xTaskCreate(LEDBlinking, "LEDBlinking", (configMINIMAL_STACK_SIZE + 50), NULL, (tskIDLE_PRIORITY + 1), NULL);
-  
-  BSP_LED_On(LED5);
+  BSP_LED_On(LED4);
 
   /* Start scheduler */
   vTaskStartScheduler();
@@ -83,10 +92,8 @@ int main(void)
 
 }
 
-static void LEDBlinking(__attribute__ ((unused)) void *pvParameters)
-{
-
-  BSP_LED_On(LED7);
+static void LEDBlinking(void *pvParameters) {
+  BSP_LED_On(LED5);
   while (1) {
     BSP_LED_On(LED3);
     vTaskDelay(500);
