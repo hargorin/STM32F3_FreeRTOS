@@ -18,7 +18,11 @@ Requires an arm-none-eabi- set of gcc tools
 
 Using [stlink](https://github.com/texane/stlink)
 
+    make flash
+or
     {sudo} st-flash write binary/stm32f3disc.bin 0x8000000
+
+Reset the microcontroller after flashing.
 
 ### Use
 
