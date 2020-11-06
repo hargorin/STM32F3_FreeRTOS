@@ -149,6 +149,29 @@ $(BUILD_DIR)/%.o: %.c
 	@echo [CC] $(notdir $<)
 	@$(CC) $(CFLAGS) $< -c -o $@
 
+
+##############################################################################
+# rules for flash programming and gdbserver by OpenOCD JTAG Debug Server...
+#
+OPENOCD = openocd
+
+OOCD_INIT  += -f board/stm32f3discovery.cfg
+OOCD_INIT  += -c "adapter_khz 1800"
+OOCD_INIT  += -c init
+OOCD_INIT  += -c "reset init"
+#OOCD_INIT += -c "targets"
+
+#OOCD_FLASH = -c "reset halt"
+OOCD_FLASH += -c "flash write_image erase $(BUILD_DIR)/$(TARGET).elf"
+OOCD_FLASH += -c "verify_image $(BUILD_DIR)/$(TARGET).elf"
+OOCD_FLASH += -c "reset run"
+OOCD_FLASH += -c shutdown
+
+#
+# End of openocd
+##############################################################################
+
+
 all: $(OBJ)
 	@echo [AS] $(ASRC)
 	@$(AS) -o $(ASRC:%.s=$(BUILD_DIR)/%.o) $(STARTUP)/$(ASRC)
@@ -158,8 +181,6 @@ all: $(OBJ)
 	@$(OBJCOPY) -O ihex $(BIN_DIR)/$(TARGET).elf $(BIN_DIR)/$(TARGET).hex
 	@echo [BIN] $(TARGET).bin
 	@$(OBJCOPY) -O binary $(BIN_DIR)/$(TARGET).elf $(BIN_DIR)/$(TARGET).bin
-
-.PHONY: clean
 
 clean:
 	@echo [RM] OBJ
@@ -172,3 +193,13 @@ clean:
 
 flash:
 	@st-flash write $(BIN_DIR)/$(TARGET).bin 0x8000000
+
+gdbserver:
+	$(OPENOCD) $(OOCD_INIT)
+
+
+killgdbserver:
+	# @echo "shutdown" | telnet localhost 4444
+	killall openocd
+
+.PHONY: clean flash gdbserver killgdbserver

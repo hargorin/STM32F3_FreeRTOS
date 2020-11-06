@@ -55,4 +55,4 @@ And you can debug with GDB as you would expect.
 
 ### Toolchain installation under ubuntu linux
 
-    [Installation Guide](https://askubuntu.com/questions/1243252/how-to-install-arm-none-eabi-gdb-on-ubuntu-20-04-lts-focal-fossa)
+[Installation Guide](https://askubuntu.com/questions/1243252/how-to-install-arm-none-eabi-gdb-on-ubuntu-20-04-lts-focal-fossa)
